@@ -58,11 +58,11 @@ using namespace std;
 
 typedef pcl::PointXYZI PointType;
 
-class ParamServer
+class ParamServer: public rclcpp::Node
 {
 public:
 
-    rclcpp::NodeHandle nh; // todo
+    // rclcpp::NodeHandle nh; // todo
 
     std::string robot_id;
 
@@ -149,87 +149,197 @@ public:
     float globalMapVisualizationPoseDensity;
     float globalMapVisualizationLeafSize;
 
-    ParamServer()
+    ParamServer(std::string node_name, const rclcpp::NodeOptions & options):Node(node_name, options)
     {
-        nh.param<std::string>("/robot_id", robot_id, "roboat");
+        //nh.param<std::string>("/robot_id", robot_id, "roboat");
+        declare_parameter("/robot_id", "roboat");
+        get_parameter("/robot_id", robot_id);
+        //nh.param<std::string>("lio_sam/pointCloudTopic", pointCloudTopic, "points_raw");
+        declare_parameter("lio_sam/pointCloudTopic", "points_raw");
+        get_parameter("lio_sam/pointCloudTopic", pointCloudTopic);
+        //nh.param<std::string>("lio_sam/imuTopic", imuTopic, "imu_correct");
+        declare_parameter("lio_sam/imuTopic", "imu_correct");
+        get_parameter("lio_sam/imuTopic", imuTopic);
+        //nh.param<std::string>("lio_sam/odomTopic", odomTopic, "odometry/imu");
+        declare_parameter("lio_sam/odomTopic", "odometry/imu");
+        get_parameter("lio_sam/odomTopic", odomTopic);
+        //nh.param<std::string>("lio_sam/gpsTopic", gpsTopic, "odometry/gps");
+        declare_parameter("lio_sam/gpsTopic", "odometry/gps");
+        get_parameter("lio_sam/gpsTopic", gpsTopic);
 
-        nh.param<std::string>("lio_sam/pointCloudTopic", pointCloudTopic, "points_raw");
-        nh.param<std::string>("lio_sam/imuTopic", imuTopic, "imu_correct");
-        nh.param<std::string>("lio_sam/odomTopic", odomTopic, "odometry/imu");
-        nh.param<std::string>("lio_sam/gpsTopic", gpsTopic, "odometry/gps");
+        //nh.param<std::string>("lio_sam/lidarFrame", lidarFrame, "base_link");
+        declare_parameter("lio_sam/lidarFrame", "base_link");
+        get_parameter("lio_sam/lidarFrame", lidarFrame);
+        //nh.param<std::string>("lio_sam/baselinkFrame", baselinkFrame, "base_link");
+        declare_parameter("lio_sam/baselinkFrame", "base_link");
+        get_parameter("lio_sam/baselinkFrame", baselinkFrame);
+        //nh.param<std::string>("lio_sam/odometryFrame", odometryFrame, "odom");
+        declare_parameter("lio_sam/odometryFrame", "odom");
+        get_parameter("lio_sam/odometryFrame", odometryFrame);
+        //nh.param<std::string>("lio_sam/mapFrame", mapFrame, "map");
+        declare_parameter("lio_sam/mapFrame", "map");
+        get_parameter("lio_sam/mapFrame", mapFrame);
 
-        nh.param<std::string>("lio_sam/lidarFrame", lidarFrame, "base_link");
-        nh.param<std::string>("lio_sam/baselinkFrame", baselinkFrame, "base_link");
-        nh.param<std::string>("lio_sam/odometryFrame", odometryFrame, "odom");
-        nh.param<std::string>("lio_sam/mapFrame", mapFrame, "map");
+        //nh.param<bool>("lio_sam/useImuHeadingInitialization", useImuHeadingInitialization, false);
+        declare_parameter("lio_sam/useImuHeadingInitialization", false);
+        get_parameter("lio_sam/useImuHeadingInitialization", useImuHeadingInitialization);
+        //nh.param<bool>("lio_sam/useGpsElevation", useGpsElevation, false);
+        declare_parameter("lio_sam/useGpsElevation", false);
+        get_parameter("lio_sam/useGpsElevation", useGpsElevation);
+        //nh.param<float>("lio_sam/gpsCovThreshold", gpsCovThreshold, 2.0);
+        declare_parameter("lio_sam/gpsCovThreshold", 2.0);
+        get_parameter("lio_sam/gpsCovThreshold", gpsCovThreshold);
+        //nh.param<float>("lio_sam/poseCovThreshold", poseCovThreshold, 25.0);
+        declare_parameter("lio_sam/poseCovThreshold", 25.0);
+        get_parameter("lio_sam/poseCovThreshold", poseCovThreshold);
 
-        nh.param<bool>("lio_sam/useImuHeadingInitialization", useImuHeadingInitialization, false);
-        nh.param<bool>("lio_sam/useGpsElevation", useGpsElevation, false);
-        nh.param<float>("lio_sam/gpsCovThreshold", gpsCovThreshold, 2.0);
-        nh.param<float>("lio_sam/poseCovThreshold", poseCovThreshold, 25.0);
+        //nh.param<bool>("lio_sam/savePCD", savePCD, false);
+        declare_parameter("lio_sam/savePCD", false);
+        get_parameter("lio_sam/savePCD", savePCD);
+        //nh.param<std::string>("lio_sam/savePCDDirectory", savePCDDirectory, "/Downloads/LOAM/");
+        declare_parameter("lio_sam/savePCDDirectory", "/Downloads/LOAM/");
+        get_parameter("lio_sam/savePCDDirectory", savePCDDirectory);
 
-        nh.param<bool>("lio_sam/savePCD", savePCD, false);
-        nh.param<std::string>("lio_sam/savePCDDirectory", savePCDDirectory, "/Downloads/LOAM/");
+        //nh.param<int>("lio_sam/N_SCAN", N_SCAN, 16);
+        declare_parameter("lio_sam/N_SCAN", 16);
+        get_parameter("lio_sam/N_SCAN", N_SCAN);
+        //nh.param<int>("lio_sam/Horizon_SCAN", Horizon_SCAN, 1800);
+        declare_parameter("lio_sam/Horizon_SCAN", 1800);
+        get_parameter("lio_sam/Horizon_SCAN", Horizon_SCAN);
+        //nh.param<std::string>("lio_sam/timeField", timeField, "time");
+        declare_parameter("lio_sam/timeField", "time");
+        get_parameter("lio_sam/timeField", timeField);
+        //nh.param<int>("lio_sam/downsampleRate", downsampleRate, 1);
+        declare_parameter("lio_sam/downsampleRate", 1);
+        get_parameter("lio_sam/downsampleRate", downsampleRate);
+        //nh.param<float>("lio_sam/lidarMinRange", lidarMinRange, 1.0);
+        declare_parameter("lio_sam/lidarMinRange", 1.0);
+        get_parameter("lio_sam/lidarMinRange", lidarMinRange);
+        //nh.param<float>("lio_sam/lidarMaxRange", lidarMaxRange, 1000.0);
+        declare_parameter("lio_sam/lidarMaxRange", 1000.0);
+        get_parameter("lio_sam/lidarMaxRange", lidarMaxRange);
 
-        nh.param<int>("lio_sam/N_SCAN", N_SCAN, 16);
-        nh.param<int>("lio_sam/Horizon_SCAN", Horizon_SCAN, 1800);
-        nh.param<std::string>("lio_sam/timeField", timeField, "time");
-        nh.param<int>("lio_sam/downsampleRate", downsampleRate, 1);
-        nh.param<float>("lio_sam/lidarMinRange", lidarMinRange, 1.0);
-        nh.param<float>("lio_sam/lidarMaxRange", lidarMaxRange, 1000.0);
-
-        nh.param<float>("lio_sam/imuAccNoise", imuAccNoise, 0.01);
-        nh.param<float>("lio_sam/imuGyrNoise", imuGyrNoise, 0.001);
-        nh.param<float>("lio_sam/imuAccBiasN", imuAccBiasN, 0.0002);
-        nh.param<float>("lio_sam/imuGyrBiasN", imuGyrBiasN, 0.00003);
-        nh.param<float>("lio_sam/imuGravity", imuGravity, 9.80511);
-        nh.param<float>("lio_sam/imuRPYWeight", imuRPYWeight, 0.01);
-        nh.param<vector<double>>("lio_sam/extrinsicRot", extRotV, vector<double>());
-        nh.param<vector<double>>("lio_sam/extrinsicRPY", extRPYV, vector<double>());
-        nh.param<vector<double>>("lio_sam/extrinsicTrans", extTransV, vector<double>());
+        //nh.param<float>("lio_sam/imuAccNoise", imuAccNoise, 0.01);
+        declare_parameter("lio_sam/imuAccNoise", 0.01);
+        get_parameter("lio_sam/imuAccNoise", imuAccNoise);
+        //nh.param<float>("lio_sam/imuGyrNoise", imuGyrNoise, 0.001);
+        declare_parameter("lio_sam/imuGyrNoise", 001);
+        get_parameter("lio_sam/imuGyrNoise", imuGyrNoise);
+        //nh.param<float>("lio_sam/imuAccBiasN", imuAccBiasN, 0.0002);
+        declare_parameter("lio_sam/imuAccBiasN", 0.0002);
+        get_parameter("lio_sam/imuAccBiasN", imuAccBiasN);
+        //nh.param<float>("lio_sam/imuGyrBiasN", imuGyrBiasN, 0.00003);
+        declare_parameter("lio_sam/imuGyrBiasN", 0.00003);
+        get_parameter("lio_sam/imuGyrBiasN", imuGyrBiasN);     
+        //nh.param<float>("lio_sam/imuGravity", imuGravity, 9.80511);
+        declare_parameter("lio_sam/imuGravity", 9.80511);
+        get_parameter("lio_sam/imuGravity", imuGravity);
+        //nh.param<float>("lio_sam/imuRPYWeight", imuRPYWeight, 0.01);
+        declare_parameter("lio_sam/imuRPYWeight", 0.01);
+        get_parameter("lio_sam/imuRPYWeight", imuRPYWeight);
+        //nh.param<vector<double>>("lio_sam/extrinsicRot", extRotV, vector<double>());
+        declare_parameter("lio_sam/extrinsicRot", vector<double>());
+        get_parameter("lio_sam/extrinsicRot", extRotV);
+        //nh.param<vector<double>>("lio_sam/extrinsicRPY", extRPYV, vector<double>());
+        declare_parameter("lio_sam/extrinsicRPY", vector<double>());
+        get_parameter("lio_sam/extrinsicRPY", extRPYV);
+        //nh.param<vector<double>>("lio_sam/extrinsicTrans", extTransV, vector<double>());
+        declare_parameter("lio_sam/extrinsicTrans", vector<double>());
+        get_parameter("lio_sam/extrinsicTrans", extTransV);
+        
         extRot = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRotV.data(), 3, 3);
         extRPY = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRPYV.data(), 3, 3);
         extTrans = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extTransV.data(), 3, 1);
         extQRPY = Eigen::Quaterniond(extRPY);
 
-        nh.param<float>("lio_sam/edgeThreshold", edgeThreshold, 0.1);
-        nh.param<float>("lio_sam/surfThreshold", surfThreshold, 0.1);
-        nh.param<int>("lio_sam/edgeFeatureMinValidNum", edgeFeatureMinValidNum, 10);
-        nh.param<int>("lio_sam/surfFeatureMinValidNum", surfFeatureMinValidNum, 100);
+        //nh.param<float>("lio_sam/edgeThreshold", edgeThreshold, 0.1);
+        declare_parameter("lio_sam/edgeThreshold", 0.1);
+        get_parameter("lio_sam/edgeThreshold", edgeThreshold);
+        //nh.param<float>("lio_sam/surfThreshold", surfThreshold, 0.1);
+        declare_parameter("lio_sam/surfThreshold", 0.1);
+        get_parameter("lio_sam/surfThreshold", surfThreshold);
+        //nh.param<int>("lio_sam/edgeFeatureMinValidNum", edgeFeatureMinValidNum, 10);
+        declare_parameter("lio_sam/edgeFeatureMinValidNum", 10);
+        get_parameter("lio_sam/edgeFeatureMinValidNum", edgeFeatureMinValidNum);
+        //nh.param<int>("lio_sam/surfFeatureMinValidNum", surfFeatureMinValidNum, 100);
+        declare_parameter("lio_sam/surfFeatureMinValidNum", 100);
+        get_parameter("lio_sam/surfFeatureMinValidNum", surfFeatureMinValidNum);
 
-        nh.param<float>("lio_sam/odometrySurfLeafSize", odometrySurfLeafSize, 0.2);
-        nh.param<float>("lio_sam/mappingCornerLeafSize", mappingCornerLeafSize, 0.2);
-        nh.param<float>("lio_sam/mappingSurfLeafSize", mappingSurfLeafSize, 0.2);
+        //nh.param<float>("lio_sam/odometrySurfLeafSize", odometrySurfLeafSize, 0.2);
+        declare_parameter("lio_sam/odometrySurfLeafSize", 0.2);
+        get_parameter("lio_sam/odometrySurfLeafSize", odometrySurfLeafSize);
+        //nh.param<float>("lio_sam/mappingCornerLeafSize", mappingCornerLeafSize, 0.2);
+        declare_parameter("lio_sam/mappingCornerLeafSize", 0.2);
+        get_parameter("lio_sam/mappingCornerLeafSize", mappingCornerLeafSize);
+        //nh.param<float>("lio_sam/mappingSurfLeafSize", mappingSurfLeafSize, 0.2);
+        declare_parameter("lio_sam/mappingSurfLeafSize", 0.2);
+        get_parameter("lio_sam/mappingSurfLeafSize", mappingSurfLeafSize);
 
-        nh.param<float>("lio_sam/z_tollerance", z_tollerance, FLT_MAX);
-        nh.param<float>("lio_sam/rotation_tollerance", rotation_tollerance, FLT_MAX);
+        //nh.param<float>("lio_sam/z_tollerance", z_tollerance, FLT_MAX);
+        declare_parameter("lio_sam/z_tollerance", FLT_MAX);
+        get_parameter("lio_sam/z_tollerance", z_tollerance);
+        //nh.param<float>("lio_sam/rotation_tollerance", rotation_tollerance, FLT_MAX);
+        declare_parameter("lio_sam/rotation_tollerance", FLT_MAX);
+        get_parameter("lio_sam/rotation_tollerance", rotation_tollerance);
+        
+        //nh.param<int>("lio_sam/numberOfCores", numberOfCores, 2);
+        declare_parameter("lio_sam/numberOfCores", 2);
+        get_parameter("lio_sam/numberOfCores", numberOfCores);
+        //nh.param<double>("lio_sam/mappingProcessInterval", mappingProcessInterval, 0.15);
+        declare_parameter("lio_sam/mappingProcessInterval", 0.15);
+        get_parameter("lio_sam/mappingProcessInterval", mappingProcessInterval);
 
-        nh.param<int>("lio_sam/numberOfCores", numberOfCores, 2);
-        nh.param<double>("lio_sam/mappingProcessInterval", mappingProcessInterval, 0.15);
+        //nh.param<float>("lio_sam/surroundingkeyframeAddingDistThreshold", surroundingkeyframeAddingDistThreshold, 1.0);
+        declare_parameter("lio_sam/surroundingkeyframeAddingDistThreshold", 1.0);
+        get_parameter("lio_sam/surroundingkeyframeAddingDistThreshold", surroundingkeyframeAddingDistThreshold);
+        //nh.param<float>("lio_sam/surroundingkeyframeAddingAngleThreshold", surroundingkeyframeAddingAngleThreshold, 0.2);
+        declare_parameter("lio_sam/surroundingkeyframeAddingAngleThreshold", 0.2);
+        get_parameter("lio_sam/surroundingkeyframeAddingAngleThreshold", surroundingkeyframeAddingAngleThreshold);
+        //nh.param<float>("lio_sam/surroundingKeyframeDensity", surroundingKeyframeDensity, 1.0);
+        declare_parameter("lio_sam/surroundingKeyframeDensity", 1.0);
+        get_parameter("lio_sam/surroundingKeyframeDensity", surroundingKeyframeDensity);
+        //nh.param<float>("lio_sam/surroundingKeyframeSearchRadius", surroundingKeyframeSearchRadius, 50.0);
+        declare_parameter("lio_sam/surroundingKeyframeSearchRadius", 50.0);
+        get_parameter("lio_sam/surroundingKeyframeSearchRadius", surroundingKeyframeSearchRadius);
 
-        nh.param<float>("lio_sam/surroundingkeyframeAddingDistThreshold", surroundingkeyframeAddingDistThreshold, 1.0);
-        nh.param<float>("lio_sam/surroundingkeyframeAddingAngleThreshold", surroundingkeyframeAddingAngleThreshold, 0.2);
-        nh.param<float>("lio_sam/surroundingKeyframeDensity", surroundingKeyframeDensity, 1.0);
-        nh.param<float>("lio_sam/surroundingKeyframeSearchRadius", surroundingKeyframeSearchRadius, 50.0);
+        //nh.param<bool>("lio_sam/loopClosureEnableFlag", loopClosureEnableFlag, false);
+        declare_parameter("lio_sam/loopClosureEnableFlag", false);
+        get_parameter("lio_sam/loopClosureEnableFlag", loopClosureEnableFlag);
+        //nh.param<float>("lio_sam/loopClosureFrequency", loopClosureFrequency, 1.0);
+        declare_parameter("lio_sam/loopClosureFrequency", 1.0);
+        get_parameter("lio_sam/loopClosureFrequency", loopClosureFrequency);
+        //nh.param<int>("lio_sam/surroundingKeyframeSize", surroundingKeyframeSize, 50);
+        declare_parameter("lio_sam/surroundingKeyframeSize", 50);
+        get_parameter("lio_sam/surroundingKeyframeSize", surroundingKeyframeSize);
+        //nh.param<float>("lio_sam/historyKeyframeSearchRadius", historyKeyframeSearchRadius, 10.0);
+        declare_parameter("lio_sam/historyKeyframeSearchRadius", 10.0);
+        get_parameter("lio_sam/historyKeyframeSearchRadius", historyKeyframeSearchRadius);
+        //nh.param<float>("lio_sam/historyKeyframeSearchTimeDiff", historyKeyframeSearchTimeDiff, 30.0);
+        declare_parameter("lio_sam/historyKeyframeSearchTimeDiff", 30.0);
+        get_parameter("lio_sam/historyKeyframeSearchTimeDiff", historyKeyframeSearchTimeDiff);
+        //nh.param<int>("lio_sam/historyKeyframeSearchNum", historyKeyframeSearchNum, 25);
+        declare_parameter("lio_sam/historyKeyframeSearchNum", 25);
+        get_parameter("lio_sam/historyKeyframeSearchNum", historyKeyframeSearchNum);
+        //nh.param<float>("lio_sam/historyKeyframeFitnessScore", historyKeyframeFitnessScore, 0.3);
+        declare_parameter("lio_sam/historyKeyframeFitnessScore", 0.3);
+        get_parameter("lio_sam/historyKeyframeFitnessScore", historyKeyframeFitnessScore);
 
-        nh.param<bool>("lio_sam/loopClosureEnableFlag", loopClosureEnableFlag, false);
-        nh.param<float>("lio_sam/loopClosureFrequency", loopClosureFrequency, 1.0);
-        nh.param<int>("lio_sam/surroundingKeyframeSize", surroundingKeyframeSize, 50);
-        nh.param<float>("lio_sam/historyKeyframeSearchRadius", historyKeyframeSearchRadius, 10.0);
-        nh.param<float>("lio_sam/historyKeyframeSearchTimeDiff", historyKeyframeSearchTimeDiff, 30.0);
-        nh.param<int>("lio_sam/historyKeyframeSearchNum", historyKeyframeSearchNum, 25);
-        nh.param<float>("lio_sam/historyKeyframeFitnessScore", historyKeyframeFitnessScore, 0.3);
-
-        nh.param<float>("lio_sam/globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius, 1e3);
-        nh.param<float>("lio_sam/globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity, 10.0);
-        nh.param<float>("lio_sam/globalMapVisualizationLeafSize", globalMapVisualizationLeafSize, 1.0);
+        //nh.param<float>("lio_sam/globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius, 1e3);
+        declare_parameter("lio_sam/globalMapVisualizationSearchRadius", 1e3);
+        get_parameter("lio_sam/globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius);
+        //nh.param<float>("lio_sam/globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity, 10.0);
+        declare_parameter("lio_sam/globalMapVisualizationPoseDensity", 10.0);
+        get_parameter("lio_sam/globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity);
+        //nh.param<float>("lio_sam/globalMapVisualizationLeafSize", globalMapVisualizationLeafSize, 1.0);
+        declare_parameter("lio_sam/globalMapVisualizationLeafSize", 1.0);
+        get_parameter("lio_sam/globalMapVisualizationLeafSize", globalMapVisualizationLeafSize);
 
         usleep(100);
     }
 
     sensor_msgs::msg::Imu imuConverter(const sensor_msgs::msg::Imu& imu_in)
     {
-        sensor_msgs::Imu imu_out = imu_in;
+        sensor_msgs::msg::Imu imu_out = imu_in;
         // rotate acceleration
         Eigen::Vector3d acc(imu_in.linear_acceleration.x, imu_in.linear_acceleration.y, imu_in.linear_acceleration.z);
         acc = extRot * acc;
@@ -252,7 +362,7 @@ public:
 
         if (sqrt(q_final.x()*q_final.x() + q_final.y()*q_final.y() + q_final.z()*q_final.z() + q_final.w()*q_final.w()) < 0.1)
         {
-            ROS_ERROR("Invalid quaternion, please use a 9-axis IMU!");
+            RCLCPP_ERROR(get_logger(), "Invalid quaternion, please use a 9-axis IMU!");
             rclcpp::shutdown();
         }
 
@@ -261,13 +371,13 @@ public:
 };
 
 
-sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher *thisPub, pcl::PointCloud<PointType>::Ptr thisCloud, rclcpp::Time thisStamp, std::string thisFrame)
+sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2> *thisPub, pcl::PointCloud<PointType>::Ptr thisCloud, rclcpp::Time thisStamp, std::string thisFrame)
 {
     sensor_msgs::msg::PointCloud2 tempCloud;
     pcl::toROSMsg(*thisCloud, tempCloud);
     tempCloud.header.stamp = thisStamp;
     tempCloud.header.frame_id = thisFrame;
-    if (thisPub->getNumSubscribers() != 0)
+    if (thisPub->get_subscription_count() != 0)
         thisPub->publish(tempCloud);
     return tempCloud;
 }
