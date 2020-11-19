@@ -29,8 +29,11 @@ include_directories(
 
 rosidl_generate_interfaces(${PROJECT_NAME} "msg/CloudInfo.msg")
 
-add_executable(${PROJECT_NAME}_featureExtraction src/featureExtraction.cpp)
-ament_target_dependencies(${PROJECT_NAME}_featureExtraction rclcpp OpenCV PCL lio_sam_ros2)
+#add_executable(${PROJECT_NAME}_featureExtraction src/featureExtraction.cpp)
+#ament_target_dependencies(${PROJECT_NAME}_featureExtraction rclcpp OpenCV PCL lio_sam_ros2)
+
+add_executable(${PROJECT_NAME}_imageProjection src/imageProjection.cpp)
+ament_target_dependencies(${PROJECT_NAME}_imageProjection rclcpp OpenCV PCL lio_sam_ros2)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

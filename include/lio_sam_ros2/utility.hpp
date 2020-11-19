@@ -371,7 +371,7 @@ public:
 };
 
 
-sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2> *thisPub, pcl::PointCloud<PointType>::Ptr thisCloud, rclcpp::Time thisStamp, std::string thisFrame)
+sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>* thisPub, pcl::PointCloud<PointType>::Ptr thisCloud, rclcpp::Time thisStamp, std::string thisFrame)
 {
     sensor_msgs::msg::PointCloud2 tempCloud;
     pcl::toROSMsg(*thisCloud, tempCloud);
@@ -385,7 +385,7 @@ sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::P
 template<typename T>
 double ROS_TIME(T msg)
 {
-    return msg->header.stamp.toSec();
+    return msg->header.stamp.sec;
 }
 
 
@@ -411,9 +411,10 @@ template<typename T>
 void imuRPY2rosRPY(sensor_msgs::msg::Imu *thisImuMsg, T *rosRoll, T *rosPitch, T *rosYaw)
 {
     double imuRoll, imuPitch, imuYaw;
-    tf::Quaternion orientation;
-    tf::quaternionMsgToTF(thisImuMsg->orientation, orientation);
-    tf::Matrix3x3(orientation).getRPY(imuRoll, imuPitch, imuYaw);
+    tf2::Quaternion orientation;
+    //tf2::quaternionMsgToTF(thisImuMsg->orientation, orientation);
+    tf2::fromMsg(thisImuMsg->orientation, orientation);
+    tf2::Matrix3x3(orientation).getRPY(imuRoll, imuPitch, imuYaw);
 
     *rosRoll = imuRoll;
     *rosPitch = imuPitch;

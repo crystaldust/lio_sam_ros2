@@ -17,11 +17,11 @@ class FeatureExtraction : public ParamServer
 
 public:
 
-    rclcpp::Subscriber subLaserCloudInfo;
+    rclcpp::Subscription<sensor_msgs::msg::PointCloud2> subLaserCloudInfo;
 
-    rclcpp::Publisher pubLaserCloudInfo;
-    rclcpp::Publisher pubCornerPoints;
-    rclcpp::Publisher pubSurfacePoints;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2> pubLaserCloudInfo;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2> pubCornerPoints;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2> pubSurfacePoints;
 
     pcl::PointCloud<PointType>::Ptr extractedCloud;
     pcl::PointCloud<PointType>::Ptr cornerCloud;
@@ -29,8 +29,8 @@ public:
 
     pcl::VoxelGrid<PointType> downSizeFilter;  // 下采样滤波器
 
-    lio_sam::cloud_info cloudInfo;
-    std_msgs::Header cloudHeader;
+    lio_sam_ros2::msg::CloudInfo cloudInfo;
+    std_msgs::msg::Header cloudHeader;
 
     std::vector<smoothness_t> cloudSmoothness;
     float *cloudCurvature;
@@ -39,7 +39,7 @@ public:
 
     FeatureExtraction()
     {
-        subLaserCloudInfo = nh.subscribe<lio_sam::cloud_info>("lio_sam/deskew/cloud_info", 1, &FeatureExtraction::laserCloudInfoHandler, this, rclcpp::TransportHints().tcpNoDelay());
+        subLaserCloudInfo = nh.subscribe<lio_sam_ros2::msg::CloudInfo>("lio_sam/deskew/cloud_info", 1, &FeatureExtraction::laserCloudInfoHandler, this, rclcpp::TransportHints().tcpNoDelay());
         pubLaserCloudInfo = nh.advertise<lio_sam::cloud_info> ("lio_sam/feature/cloud_info", 1);
         pubCornerPoints = nh.advertise<sensor_msgs::PointCloud2>("lio_sam/feature/cloud_corner", 1);
         pubSurfacePoints = nh.advertise<sensor_msgs::PointCloud2>("lio_sam/feature/cloud_surface", 1);        
@@ -59,7 +59,7 @@ public:
         cloudLabel = new int[N_SCAN*Horizon_SCAN];
     }
 
-    void laserCloudInfoHandler(const lio_sam::cloud_infoConstPtr& msgIn)
+    void laserCloudInfoHandler(const lio_sam_ros2::msg::CloudInfo::ConstPtr& msgIn)
     {
         cloudInfo = *msgIn; // new cloud info
         cloudHeader = msgIn->header; // new cloud header
