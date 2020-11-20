@@ -371,16 +371,16 @@ public:
 };
 
 
-sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>* thisPub, pcl::PointCloud<PointType>::Ptr thisCloud, rclcpp::Time thisStamp, std::string thisFrame)
-{
-    sensor_msgs::msg::PointCloud2 tempCloud;
-    pcl::toROSMsg(*thisCloud, tempCloud);
-    tempCloud.header.stamp = thisStamp;
-    tempCloud.header.frame_id = thisFrame;
-    if (thisPub->get_subscription_count() != 0)
-        thisPub->publish(tempCloud);
-    return tempCloud;
-}
+//sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr thisPub, pcl::PointCloud<PointType>::Ptr thisCloud, rclcpp::Time thisStamp, std::string thisFrame)
+//{
+//    sensor_msgs::msg::PointCloud2 tempCloud;
+//    pcl::toROSMsg(*thisCloud, tempCloud);
+//    tempCloud.header.stamp = thisStamp;
+//    tempCloud.header.frame_id = thisFrame;
+//    if (thisPub->get_subscription_count() != 0)
+//        thisPub->publish(tempCloud);
+//    return tempCloud;
+//}
 
 template<typename T>
 double ROS_TIME(T msg)
