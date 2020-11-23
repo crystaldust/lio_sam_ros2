@@ -337,7 +337,7 @@ public:
             return;
 
         nav_msgs::msg::Odometry startOdomMsg;
-        for (int i = 0; i < (int)odomQueue.size(); ++i)
+        for (int i = 0; i < odomQueue.size(); ++i)
         {
             startOdomMsg = odomQueue[i];
             
@@ -371,7 +371,7 @@ public:
             
         nav_msgs::msg::Odometry endOdomMsg;
         
-        for (int i = 0; i < (int)odomQueue.size(); ++i)
+        for (int i = 0; i < odomQueue.size(); ++i)
         {
             endOdomMsg = odomQueue[i];
 
@@ -419,7 +419,6 @@ public:
         }
         else
         {
-            // 根据点的时间信息，获得每个点的时刻的旋转变化量
             int imuPointerBack = imuPointerFront - 1;
             double ratioFront = (pointTime - imuTime[imuPointerBack]) / (imuTime[imuPointerFront] - imuTime[imuPointerBack]);
             double ratioBack = (imuTime[imuPointerFront] - pointTime) / (imuTime[imuPointerFront] - imuTime[imuPointerBack]);

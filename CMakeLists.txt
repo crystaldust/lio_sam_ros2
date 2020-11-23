@@ -18,8 +18,18 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(lio_sam_ros2 REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
@@ -27,13 +37,14 @@ include_directories(
   include/lio_sam_ros2
 )
 
-rosidl_generate_interfaces(${PROJECT_NAME} "msg/CloudInfo.msg")
+rosidl_generate_interfaces(${PROJECT_NAME} "msg/CloudInfo.msg" DEPENDENCIES std_msgs sensor_msgs)
 
 #add_executable(${PROJECT_NAME}_featureExtraction src/featureExtraction.cpp)
 #ament_target_dependencies(${PROJECT_NAME}_featureExtraction rclcpp OpenCV PCL lio_sam_ros2)
 
 add_executable(${PROJECT_NAME}_imageProjection src/imageProjection.cpp)
-ament_target_dependencies(${PROJECT_NAME}_imageProjection rclcpp OpenCV PCL lio_sam_ros2)
+ament_target_dependencies(${PROJECT_NAME}_imageProjection rclcpp rclpy std_msgs sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros tf2_eigen tf2_sensor_msgs tf2_geometry_msgs OpenCV PCL)
+rosidl_target_interfaces(${PROJECT_NAME}_imageProjection ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -47,3 +58,9 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
+
+install(TARGETS
+  ${PROJECT_NAME}_imageProjection
+  DESTINATION lib/${PROJECT_NAME}
+)
