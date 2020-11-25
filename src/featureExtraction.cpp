@@ -270,7 +270,7 @@ int main(int argc, char** argv)
     auto fe = std::make_shared<FeatureExtraction>(options);
     exec.add_node(fe);
     
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "\033[1;32m----> Image Projection Started.\033[0m");
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "\033[1;32m----> Feature Extraction Started.\033[0m");
     
     exec.spin();
     rclcpp::shutdown();
