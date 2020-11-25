@@ -5,6 +5,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <std_msgs/msg/header.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
