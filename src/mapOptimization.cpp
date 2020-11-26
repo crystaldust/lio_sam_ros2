@@ -147,6 +147,11 @@ public:
     Eigen::Affine3f transPointAssociateToMap;
     Eigen::Affine3f incrementalOdometryAffineFront;
     Eigen::Affine3f incrementalOdometryAffineBack;
+    
+    std::unique_ptr<tf2_ros::TransformBroadcaster> br;
+    std::shared_ptr<tf2_ros::Buffer> tf_buffer;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener;
+    geometry_msgs::msg::TransformStamped trans_odom_to_lidar;
 
     mapOptimization(const rclcpp::NodeOptions & options):ParamServer("lio_sam_ros2_map_optimization", options)
     {
@@ -389,7 +394,7 @@ public:
 
     void publishGlobalMap()
     {
-        if (pubLaserCloudSurround.getNumSubscribers() == 0)
+        if (pubLaserCloudSurround->get_subscription_count() == 0)
             return;
 
         if (cloudKeyPoses3D->points.empty() == true)
@@ -485,7 +490,7 @@ public:
             loopFindNearKeyframes(prevKeyframeCloud, loopKeyPre, historyKeyframeSearchNum);
             if (cureKeyframeCloud->size() < 300 || prevKeyframeCloud->size() < 1000)
                 return;
-            if (pubHistoryKeyFrames.getNumSubscribers() != 0)
+            if (pubHistoryKeyFrames->get_subscription_count() != 0)
                 publishCloud(pubHistoryKeyFrames, prevKeyframeCloud, timeLaserInfoStamp, odometryFrame);
         }
 
@@ -507,7 +512,7 @@ public:
             return;
 
         // publish corrected cloud
-        if (pubIcpKeyFrames.getNumSubscribers() != 0)
+        if (pubIcpKeyFrames->get_subscription_count() != 0)
         {
             pcl::PointCloud<PointType>::Ptr closed_cloud(new pcl::PointCloud<PointType>());
             pcl::transformPointCloud(*cureKeyframeCloud, *closed_cloud, icp.getFinalTransformation());
@@ -1503,12 +1508,13 @@ public:
     void updatePath(const PointTypePose& pose_in)
     {
         geometry_msgs::msg::PoseStamped pose_stamped;
-        pose_stamped.header.stamp = rclcpp::Time().(pose_in.time);
+        pose_stamped.header.stamp = rclcpp::Time((int)pose_in.time);
         pose_stamped.header.frame_id = odometryFrame;
         pose_stamped.pose.position.x = pose_in.x;
         pose_stamped.pose.position.y = pose_in.y;
         pose_stamped.pose.position.z = pose_in.z;
-        tf2::Quaternion q = tf2::createQuaternionFromRPY(pose_in.roll, pose_in.pitch, pose_in.yaw);
+        tf2::Quaternion q;
+        q.setRPY(pose_in.roll, pose_in.pitch, pose_in.yaw);
         pose_stamped.pose.orientation.x = q.x();
         pose_stamped.pose.orientation.y = q.y();
         pose_stamped.pose.orientation.z = q.z();
@@ -1527,14 +1533,19 @@ public:
         laserOdometryROS.pose.pose.position.x = transformTobeMapped[3];
         laserOdometryROS.pose.pose.position.y = transformTobeMapped[4];
         laserOdometryROS.pose.pose.position.z = transformTobeMapped[5];
-        laserOdometryROS.pose.pose.orientation = tf2::createQuaternionMsgFromRollPitchYaw(transformTobeMapped[0], transformTobeMapped[1], transformTobeMapped[2]);
+        tf2::Quaternion quat_tf;
+        quat_tf.setRPY(transformTobeMapped[0], transformTobeMapped[1], transformTobeMapped[2]);
+        geometry_msgs::msg::Quaternion quat_msg;
+        tf2::convert(quat_tf, quat_msg);
         pubLaserOdometryGlobal->publish(laserOdometryROS);
         // Publish TF
-        static tf2::TransformBroadcaster br;
-        tf2::Transform t_odom_to_lidar = tf2::Transform(tf2::createQuaternionFromRPY(transformTobeMapped[0], transformTobeMapped[1], transformTobeMapped[2]),
-                                                      tf2::Vector3(transformTobeMapped[3], transformTobeMapped[4], transformTobeMapped[5]));
-        tf2::StampedTransform trans_odom_to_lidar = tf2::StampedTransform(t_odom_to_lidar, timeLaserInfoStamp, odometryFrame, "lidar_link");
-        br.sendTransform(trans_odom_to_lidar);
+        tf2::Quaternion q1;
+        q1.setRPY(transformTobeMapped[0], transformTobeMapped[1], transformTobeMapped[2]);
+        tf2::Transform t_odom_to_lidar = tf2::Transform(q1, tf2::Vector3(transformTobeMapped[3], transformTobeMapped[4], transformTobeMapped[5]));
+        tf2::TimePoint time_point = tf2::TimePoint(std::chrono::seconds(timeLaserInfoStamp.nanoseconds()));
+        tf2::Stamped<tf2::Transform> temp_odom_to_lidar(t_odom_to_lidar, time_point, odometryFrame);
+        tf2::convert(temp_odom_to_lidar, trans_odom_to_lidar);
+        br->sendTransform(trans_odom_to_lidar);
 
         // Publish odometry for ROS (incremental)
         static bool lastIncreOdomPubFlag = false;
@@ -1546,15 +1557,15 @@ public:
             lastIncreOdomPubFlag = true;
             laserOdomIncremental = laserOdometryROS;
             increOdomAffine = trans2Affine3f(transformTobeMapped);
-        } else {
-
+        }
+        else 
+        {
             Eigen::Affine3f affineIncre = incrementalOdometryAffineFront.inverse() * incrementalOdometryAffineBack;
             increOdomAffine = increOdomAffine * affineIncre;
             float x, y, z, roll, pitch, yaw;
             pcl::getTranslationAndEulerAngles (increOdomAffine, x, y, z, roll, pitch, yaw);
             if (cloudInfo.imu_available == true)
             {
-
                 if (std::abs(cloudInfo.imu_pitch_init) < 1.4)
                 {
                     double imuWeight = imuRPYWeight;
@@ -1574,10 +1585,19 @@ public:
             laserOdomIncremental.pose.pose.position.x = x;
             laserOdomIncremental.pose.pose.position.y = y;
             laserOdomIncremental.pose.pose.position.z = z;
-            laserOdomIncremental.pose.pose.orientation = tf2::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
+            
+            tf2::Quaternion quat_tf_1;
+            quat_tf_1.setRPY(roll, pitch, yaw);
+            geometry_msgs::msg::Quaternion quat_msg_1;
+            tf2::convert(quat_tf_1, quat_msg_1);
+            
+            laserOdomIncremental.pose.pose.orientation = quat_msg_1;
+            if (isDegenerate)
+                laserOdomIncremental.pose.covariance[0] = 1;
+            else
+                laserOdomIncremental.pose.covariance[0] = 0;
         }
-
-        pubLaserOdometryIncremental->publish(laserOdomIncremental);
+        pubLaserOdometryGlobal->publish(laserOdomIncremental);
     }
 
     void publishFrames()
@@ -1589,7 +1609,7 @@ public:
 
         publishCloud(pubRecentKeyFrames, laserCloudSurfFromMapDS, timeLaserInfoStamp, odometryFrame);
 
-        if (pubRecentKeyFrame.getNumSubscribers() != 0)
+        if (pubRecentKeyFrame->get_subscription_count() != 0)
         {
             pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
             PointTypePose thisPose6D = trans2PointTypePose(transformTobeMapped);
@@ -1598,7 +1618,7 @@ public:
             publishCloud(pubRecentKeyFrame, cloudOut, timeLaserInfoStamp, odometryFrame);
         }
 
-        if (pubCloudRegisteredRaw.getNumSubscribers() != 0)
+        if (pubCloudRegisteredRaw->get_subscription_count() != 0)
         {
             pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
             pcl::fromROSMsg(cloudInfo.cloud_deskewed, *cloudOut);
@@ -1607,13 +1627,14 @@ public:
             publishCloud(pubCloudRegisteredRaw, cloudOut, timeLaserInfoStamp, odometryFrame);
         }
 
-        if (pubPath.getNumSubscribers() != 0)
+        if (pubPath->get_subscription_count() != 0)
         {
             globalPath.header.stamp = timeLaserInfoStamp;
             globalPath.header.frame_id = odometryFrame;
             pubPath->publish(globalPath);
         }
     }
+
 };
 
 
@@ -1623,14 +1644,10 @@ int main(int argc, char** argv)
     rclcpp::NodeOptions options;
     options.use_intra_process_comms(true);
     rclcpp::executors::SingleThreadedExecutor exec;
-
-    auto mo = std::make_shared<mapOptimization>(options);
-    exec.add_node(mo);
-    
+    auto map_opt = std::make_shared<mapOptimization>(options);
+    exec.add_node(map_opt);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "\033[1;32m----> Map Optimization Started.\033[0m");
-    
     exec.spin();
     rclcpp::shutdown();
-    
     return 0;
 }
