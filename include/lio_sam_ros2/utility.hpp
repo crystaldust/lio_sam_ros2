@@ -34,11 +34,9 @@
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_listener.h>
-#include <tf2/transform_datatypes.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2_ros/buffer.h>
  
 #include <vector>
 #include <cmath>
@@ -57,18 +55,19 @@
 #include <array>
 #include <thread>
 #include <mutex>
-#include <chrono>
 
 using namespace std;
 
 typedef pcl::PointXYZI PointType;
 
+double ROS_TIME(T msg)
+{
+    return msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9
+}
+
 class ParamServer: public rclcpp::Node
 {
 public:
-
-    // rclcpp::NodeHandle nh; // todo
-
     std::string robot_id;
 
     //Topics
@@ -154,7 +153,7 @@ public:
     float globalMapVisualizationPoseDensity;
     float globalMapVisualizationLeafSize;
 
-    ParamServer(std::string node_name, const rclcpp::NodeOptions & options):Node(node_name, options)
+    ParamServer(std::string node_name, const rclcpp::NodeOptions & options) : Node(node_name, options)
     {
         declare_parameter("/robot_id", "roboat");
         get_parameter("/robot_id", robot_id);
