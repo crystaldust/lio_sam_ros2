@@ -243,7 +243,7 @@ public:
     void laserCloudInfoHandler(const lio_sam_ros2::msg::CloudInfo::ConstPtr& msgIn)
     {
         timeLaserInfoStamp = msgIn->header.stamp;
-        timeLaserInfoCur = msgIn->header.stamp.sec;
+        timeLaserInfoCur = msgIn->header.stamp.sec + msgIn->header.stamp.nanosec;
 
         cloudInfo = *msgIn;
         pcl::fromROSMsg(msgIn->cloud_corner,  *laserCloudCornerLast);
@@ -1321,12 +1321,12 @@ public:
 
         while (!gpsQueue.empty())
         {
-            if (gpsQueue.front().header.stamp.sec < timeLaserInfoCur - 0.2)
+            if (gpsQueue.front().header.stamp.sec + gpsQueue.front().header.stamp.nanosec * 1e-9 < timeLaserInfoCur - 0.2)
             {
                 // message too old
                 gpsQueue.pop_front();
             }
-            else if (gpsQueue.front().header.stamp.sec > timeLaserInfoCur + 0.2)
+            else if (gpsQueue.front().header.stamp.sec + gpsQueue.front().header.stamp.nanosec * 1e-9 > timeLaserInfoCur + 0.2)
             {
                 // message too new
                 break;

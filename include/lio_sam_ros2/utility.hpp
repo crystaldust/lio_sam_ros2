@@ -60,11 +60,6 @@ using namespace std;
 
 typedef pcl::PointXYZI PointType;
 
-double ROS_TIME(T msg)
-{
-    return msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9
-}
-
 class ParamServer: public rclcpp::Node
 {
 public:
@@ -335,7 +330,7 @@ sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::P
 template<typename T>
 double ROS_TIME(T msg)
 {
-    return msg->header.stamp.sec;
+    return msg->header.stamp.sec + msg->header.stamp.nanosec;
 }
 
 
