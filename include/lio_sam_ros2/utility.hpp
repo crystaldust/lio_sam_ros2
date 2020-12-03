@@ -200,7 +200,7 @@ public:
 
         declare_parameter("lio_sam_ros2/imuAccNoise", 0.01);
         get_parameter("lio_sam_ros2/imuAccNoise", imuAccNoise);
-        declare_parameter("lio_sam_ros2/imuGyrNoise", 001);
+        declare_parameter("lio_sam_ros2/imuGyrNoise", 0.01);
         get_parameter("lio_sam_ros2/imuGyrNoise", imuGyrNoise);
         declare_parameter("lio_sam_ros2/imuAccBiasN", 0.0002);
         get_parameter("lio_sam_ros2/imuAccBiasN", imuAccBiasN);
