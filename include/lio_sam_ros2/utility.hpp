@@ -2,6 +2,8 @@
 #ifndef _UTILITY_LIDAR_ODOMETRY_H_
 #define _UTILITY_LIDAR_ODOMETRY_H_
 
+#include <iostream>
+using std::cout; 	using std::endl;
 #include <rclcpp/rclcpp.hpp>
 
 #include <std_msgs/msg/header.hpp>
@@ -210,17 +212,40 @@ public:
         get_parameter("lio_sam_ros2/imuGravity", imuGravity);
         declare_parameter("lio_sam_ros2/imuRPYWeight", 0.01);
         get_parameter("lio_sam_ros2/imuRPYWeight", imuRPYWeight);
-        declare_parameter("lio_sam_ros2/extrinsicRot", vector<double>());
-        get_parameter("lio_sam_ros2/extrinsicRot", extRotV);
-        declare_parameter("lio_sam_ros2/extrinsicRPY", vector<double>());
-        get_parameter("lio_sam_ros2/extrinsicRPY", extRPYV);
-        declare_parameter("lio_sam_ros2/extrinsicTrans", vector<double>());
-        get_parameter("lio_sam_ros2/extrinsicTrans", extTransV);
+        //declare_parameter("lio_sam_ros2/extrinsicRot", vector<double>());
+        //get_parameter("lio_sam_ros2/extrinsicRot", extRotV);
+        //declare_parameter("lio_sam_ros2/extrinsicRPY", vector<double>());
+        //get_parameter("lio_sam_ros2/extrinsicRPY", extRPYV);
+        //declare_parameter("lio_sam_ros2/extrinsicTrans", vector<double>());
+        //get_parameter("lio_sam_ros2/extrinsicTrans", extTransV);
+
+        double org_data1[] = {-1, 0, 0,
+                               0, 1, 0,
+                               0, 0, -1};
+        std::vector < double > data1(org_data1, std::end(org_data1));
+        declare_parameter("extrinsicRot", data1);
+        get_parameter("extrinsicRot", extRotV);
+
+        double org_data2[] = {0, 1, 0,
+                             -1, 0, 0,
+                              0, 0, 1}; 
+       	std::vector < double > data2(org_data2, std::end(org_data2));
+        declare_parameter("extrinsicRPY", data2);
+        get_parameter("extrinsicRPY", extRPYV);
         
+	double org_data3[] = {0, 0, 0};
+        std::vector < double > data3(org_data3, std::end(org_data3));
+        declare_parameter("extrinsicTrans", data3);
+        get_parameter("extrinsicTrans", extTransV);
+
+	//cout << " eigen begins" << endl;
+	//cout << extRotV.data() << endl;
         extRot = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRotV.data(), 3, 3);
+	cout << " eigen ends" << endl;
         extRPY = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRPYV.data(), 3, 3);
         extTrans = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extTransV.data(), 3, 1);
         extQRPY = Eigen::Quaterniond(extRPY);
+	return;
 
         declare_parameter("lio_sam_ros2/edgeThreshold", 0.1);
         get_parameter("lio_sam_ros2/edgeThreshold", edgeThreshold);

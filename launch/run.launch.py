@@ -17,7 +17,7 @@ def generate_launch_description():
             parameters=[mapping_param_dir],
             output='screen'
             )
-    '''
+
     imu_preintegration = launch_ros.actions.Node(
             package='lio_sam_ros2',
             executable='lio_sam_ros2_imuPreintegration',
@@ -38,7 +38,7 @@ def generate_launch_description():
             parameters=[mapping_param_dir],
             output='screen'
             )
-    '''
+
     return launch.LaunchDescription(
             [
             launch.actions.DeclareLaunchArgument(
@@ -46,8 +46,8 @@ def generate_launch_description():
                 default_value=mapping_param_dir
                 ),
             image_projection,
-            #imu_preintegration,
-            #feature_extraction,
-            #map_optimization
+            imu_preintegration,
+            feature_extraction,
+            map_optimization
             ]
             )

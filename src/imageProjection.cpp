@@ -1,6 +1,10 @@
 #include "utility.hpp"
 #include "lio_sam_ros2/msg/cloud_info.hpp"
 
+#include <rclcpp/rclcpp.hpp>
+
+using rclcpp::Node;
+
 // Velodyne
 struct PointXYZIRT
 {
@@ -59,7 +63,7 @@ private:
     std_msgs::msg::Header cloudHeader;
 
 public:
-    ImageProjection(const rclcpp::NodeOptions & options):ParamServer("lio_sam_ros2_imageProjection", options), deskewFlag(0)
+    ImageProjection(const rclcpp::NodeOptions & options) : ParamServer("lio_sam_ros2_imageProjection", options)//, deskewFlag(0)
     {
         auto imu_callback = [this](const sensor_msgs::msg::Imu::ConstPtr msg) -> void
         {
@@ -84,8 +88,7 @@ public:
     }
 
     void allocateMemory()
-    {   
-        
+    {           
         laserCloudIn.reset(new pcl::PointCloud<PointXYZIRT>());
         fullCloud.reset(new pcl::PointCloud<PointType>());
         extractedCloud.reset(new pcl::PointCloud<PointType>());
@@ -113,7 +116,6 @@ public:
             imuRotZ[i] = 0;
         }
     }
-    
 
     ~ImageProjection(){}
 
@@ -433,18 +435,21 @@ public:
         cloudInfo.cloud_deskewed  = publishCloud(pubExtractedCloud, extractedCloud, cloudHeader.stamp, lidarFrame);
         pubLaserCloudInfo->publish(cloudInfo);
     }
+    
 };
 
 int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
     rclcpp::NodeOptions options;
+    //std::cout << "using for test." << std::endl;
     options.use_intra_process_comms(true);
     rclcpp::executors::SingleThreadedExecutor exec;
+    //auto temp = std::make_shared<ParamServer>("my_paramserver", options);
     auto ip = std::make_shared<ImageProjection>(options);
     exec.add_node(ip);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "\033[1;32m----> Image Projection Started.\033[0m");
-    exec.spin();
+    exec.spin(); 
     rclcpp::shutdown();
     return 0;
 }
