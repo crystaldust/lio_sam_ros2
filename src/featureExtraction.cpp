@@ -34,7 +34,7 @@ public:
     float *cloudCurvature;
     int *cloudNeighborPicked;
     int *cloudLabel;
-
+    
     FeatureExtraction(const rclcpp::NodeOptions & options):ParamServer("lio_sam_ros2_featureExtraction", options)
     {
         auto laserCloudInfo_callback = [this](const lio_sam_ros2::msg::CloudInfo::ConstPtr msg) -> void
@@ -197,8 +197,14 @@ public:
                 }
             }
             surfaceCloudScanDS->clear();
+            
+            std::cout << "cloud size:" << surfaceCloudScan->size() << std::endl;
+            
             downSizeFilter.setInputCloud(surfaceCloudScan);
             downSizeFilter.filter(*surfaceCloudScanDS);
+            
+            std::cout << "filtered cloud size:" << surfaceCloudScanDS->size() << std::endl;
+            
             *surfaceCloud += *surfaceCloudScanDS;
         }
     }
@@ -213,9 +219,14 @@ public:
 
     void publishFeatureCloud()
     {
-        freeCloudInfoMemory(); 
-        cloudInfo.cloud_corner  = publishCloud(pubCornerPoints,  cornerCloud,  cloudHeader.stamp, lidarFrame);
+        freeCloudInfoMemory();
+
+        cloudInfo.cloud_corner = publishCloud(pubCornerPoints,  cornerCloud,  cloudHeader.stamp, lidarFrame);
+        
         cloudInfo.cloud_surface = publishCloud(pubSurfacePoints, surfaceCloud, cloudHeader.stamp, lidarFrame);
+        
+        std::cout << "+++++++++++++++" << std::endl;
+        
         pubLaserCloudInfo->publish(cloudInfo);
     }
 };

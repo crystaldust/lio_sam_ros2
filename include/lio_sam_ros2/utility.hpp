@@ -3,7 +3,6 @@
 #define _UTILITY_LIDAR_ODOMETRY_H_
 
 #include <iostream>
-using std::cout; 	using std::endl;
 #include <rclcpp/rclcpp.hpp>
 
 #include <std_msgs/msg/header.hpp>
@@ -17,7 +16,6 @@ using std::cout; 	using std::endl;
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
-//#include <opencv/cv.h>
 #include <opencv2/opencv.hpp>
 
 #include <pcl/point_cloud.h>
@@ -200,13 +198,13 @@ public:
         declare_parameter("lio_sam_ros2/lidarMaxRange", 1000.0);
         get_parameter("lio_sam_ros2/lidarMaxRange", lidarMaxRange);
 
-        declare_parameter("lio_sam_ros2/imuAccNoise", 0.01);
+        declare_parameter("lio_sam_ros2/imuAccNoise", 3.9939570888238808e-03);
         get_parameter("lio_sam_ros2/imuAccNoise", imuAccNoise);
-        declare_parameter("lio_sam_ros2/imuGyrNoise", 0.01);
+        declare_parameter("lio_sam_ros2/imuGyrNoise", 1.5636343949698187e-03);
         get_parameter("lio_sam_ros2/imuGyrNoise", imuGyrNoise);
-        declare_parameter("lio_sam_ros2/imuAccBiasN", 0.0002);
+        declare_parameter("lio_sam_ros2/imuAccBiasN", 6.4356659353532566e-05);
         get_parameter("lio_sam_ros2/imuAccBiasN", imuAccBiasN);
-        declare_parameter("lio_sam_ros2/imuGyrBiasN", 0.00003);
+        declare_parameter("lio_sam_ros2/imuGyrBiasN", 3.5640318696367613e-05);
         get_parameter("lio_sam_ros2/imuGyrBiasN", imuGyrBiasN);
         declare_parameter("lio_sam_ros2/imuGravity", 9.80511);
         get_parameter("lio_sam_ros2/imuGravity", imuGravity);
@@ -219,21 +217,21 @@ public:
         //declare_parameter("lio_sam_ros2/extrinsicTrans", vector<double>());
         //get_parameter("lio_sam_ros2/extrinsicTrans", extTransV);
 
-        double org_data1[] = {-1, 0, 0,
-                               0, 1, 0,
-                               0, 0, -1};
+        double org_data1[] = {-1.0, 0.0, 0.0,
+                               0.0, 1.0, 0.0,
+                               0.0, 0.0, -1.0};
         std::vector < double > data1(org_data1, std::end(org_data1));
         declare_parameter("extrinsicRot", data1);
         get_parameter("extrinsicRot", extRotV);
 
-        double org_data2[] = {0, 1, 0,
-                             -1, 0, 0,
-                              0, 0, 1}; 
-       	std::vector < double > data2(org_data2, std::end(org_data2));
+        double org_data2[] = {0.0, 1.0, 0.0,
+                             -1.0, 0.0, 0.0,
+                              0.0, 0.0, 1.0}; 
+        std::vector < double > data2(org_data2, std::end(org_data2));
         declare_parameter("extrinsicRPY", data2);
         get_parameter("extrinsicRPY", extRPYV);
         
-	double org_data3[] = {0, 0, 0};
+	double org_data3[] = {0.0, 0.0, 0.0};
         std::vector < double > data3(org_data3, std::end(org_data3));
         declare_parameter("extrinsicTrans", data3);
         get_parameter("extrinsicTrans", extTransV);
@@ -241,13 +239,12 @@ public:
 	//cout << " eigen begins" << endl;
 	//cout << extRotV.data() << endl;
         extRot = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRotV.data(), 3, 3);
-	cout << " eigen ends" << endl;
+	//cout << " eigen ends" << endl;
         extRPY = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRPYV.data(), 3, 3);
         extTrans = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extTransV.data(), 3, 1);
         extQRPY = Eigen::Quaterniond(extRPY);
-	return;
 
-        declare_parameter("lio_sam_ros2/edgeThreshold", 0.1);
+        declare_parameter("lio_sam_ros2/edgeThreshold", 1.0);
         get_parameter("lio_sam_ros2/edgeThreshold", edgeThreshold);
         declare_parameter("lio_sam_ros2/surfThreshold", 0.1);
         get_parameter("lio_sam_ros2/surfThreshold", surfThreshold);
@@ -256,19 +253,19 @@ public:
         declare_parameter("lio_sam_ros2/surfFeatureMinValidNum", 100);
         get_parameter("lio_sam_ros2/surfFeatureMinValidNum", surfFeatureMinValidNum);
 
-        declare_parameter("lio_sam_ros2/odometrySurfLeafSize", 0.2);
+        declare_parameter("lio_sam_ros2/odometrySurfLeafSize", 0.4);
         get_parameter("lio_sam_ros2/odometrySurfLeafSize", odometrySurfLeafSize);
         declare_parameter("lio_sam_ros2/mappingCornerLeafSize", 0.2);
         get_parameter("lio_sam_ros2/mappingCornerLeafSize", mappingCornerLeafSize);
-        declare_parameter("lio_sam_ros2/mappingSurfLeafSize", 0.2);
+        declare_parameter("lio_sam_ros2/mappingSurfLeafSize", 0.4);
         get_parameter("lio_sam_ros2/mappingSurfLeafSize", mappingSurfLeafSize);
 
-        declare_parameter("lio_sam_ros2/z_tollerance", FLT_MAX);
+        declare_parameter("lio_sam_ros2/z_tollerance", 1000.0);
         get_parameter("lio_sam_ros2/z_tollerance", z_tollerance);
-        declare_parameter("lio_sam_ros2/rotation_tollerance", FLT_MAX);
+        declare_parameter("lio_sam_ros2/rotation_tollerance", 1000.0);
         get_parameter("lio_sam_ros2/rotation_tollerance", rotation_tollerance);
         
-        declare_parameter("lio_sam_ros2/numberOfCores", 2);
+        declare_parameter("lio_sam_ros2/numberOfCores", 4);
         get_parameter("lio_sam_ros2/numberOfCores", numberOfCores);
         declare_parameter("lio_sam_ros2/mappingProcessInterval", 0.15);
         get_parameter("lio_sam_ros2/mappingProcessInterval", mappingProcessInterval);
@@ -277,18 +274,18 @@ public:
         get_parameter("lio_sam_ros2/surroundingkeyframeAddingDistThreshold", surroundingkeyframeAddingDistThreshold);
         declare_parameter("lio_sam_ros2/surroundingkeyframeAddingAngleThreshold", 0.2);
         get_parameter("lio_sam_ros2/surroundingkeyframeAddingAngleThreshold", surroundingkeyframeAddingAngleThreshold);
-        declare_parameter("lio_sam_ros2/surroundingKeyframeDensity", 1.0);
+        declare_parameter("lio_sam_ros2/surroundingKeyframeDensity", 2.0);
         get_parameter("lio_sam_ros2/surroundingKeyframeDensity", surroundingKeyframeDensity);
         declare_parameter("lio_sam_ros2/surroundingKeyframeSearchRadius", 50.0);
         get_parameter("lio_sam_ros2/surroundingKeyframeSearchRadius", surroundingKeyframeSearchRadius);
 
-        declare_parameter("lio_sam_ros2/loopClosureEnableFlag", false);
+        declare_parameter("lio_sam_ros2/loopClosureEnableFlag", true);
         get_parameter("lio_sam_ros2/loopClosureEnableFlag", loopClosureEnableFlag);
         declare_parameter("lio_sam_ros2/loopClosureFrequency", 1.0);
         get_parameter("lio_sam_ros2/loopClosureFrequency", loopClosureFrequency);
         declare_parameter("lio_sam_ros2/surroundingKeyframeSize", 50);
         get_parameter("lio_sam_ros2/surroundingKeyframeSize", surroundingKeyframeSize);
-        declare_parameter("lio_sam_ros2/historyKeyframeSearchRadius", 10.0);
+        declare_parameter("lio_sam_ros2/historyKeyframeSearchRadius", 15.0);
         get_parameter("lio_sam_ros2/historyKeyframeSearchRadius", historyKeyframeSearchRadius);
         declare_parameter("lio_sam_ros2/historyKeyframeSearchTimeDiff", 30.0);
         get_parameter("lio_sam_ros2/historyKeyframeSearchTimeDiff", historyKeyframeSearchTimeDiff);
@@ -297,7 +294,7 @@ public:
         declare_parameter("lio_sam_ros2/historyKeyframeFitnessScore", 0.3);
         get_parameter("lio_sam_ros2/historyKeyframeFitnessScore", historyKeyframeFitnessScore);
 
-        declare_parameter("lio_sam_ros2/globalMapVisualizationSearchRadius", 1e3);
+        declare_parameter("lio_sam_ros2/globalMapVisualizationSearchRadius", 1000.0);
         get_parameter("lio_sam_ros2/globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius);
         declare_parameter("lio_sam_ros2/globalMapVisualizationPoseDensity", 10.0);
         get_parameter("lio_sam_ros2/globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity);
@@ -347,8 +344,12 @@ sensor_msgs::msg::PointCloud2 publishCloud(rclcpp::Publisher<sensor_msgs::msg::P
     pcl::toROSMsg(*thisCloud, tempCloud);
     tempCloud.header.stamp = thisStamp;
     tempCloud.header.frame_id = thisFrame;
+    std::cout << thisPub->get_subscription_count() << std::endl;
     if (thisPub->get_subscription_count() != 0)
+    {
+        //std::cout << "******************************************" << std::endl;
         thisPub->publish(tempCloud);
+    }
     return tempCloud;
 }
 

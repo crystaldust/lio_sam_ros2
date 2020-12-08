@@ -432,7 +432,7 @@ public:
     void publishClouds()
     {
 	cloudInfo.header = cloudHeader;
-        cloudInfo.cloud_deskewed  = publishCloud(pubExtractedCloud, extractedCloud, cloudHeader.stamp, lidarFrame);
+	cloudInfo.cloud_deskewed  = publishCloud(pubExtractedCloud, extractedCloud, cloudHeader.stamp, lidarFrame);
         pubLaserCloudInfo->publish(cloudInfo);
     }
     
@@ -442,10 +442,8 @@ int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
     rclcpp::NodeOptions options;
-    //std::cout << "using for test." << std::endl;
     options.use_intra_process_comms(true);
-    rclcpp::executors::SingleThreadedExecutor exec;
-    //auto temp = std::make_shared<ParamServer>("my_paramserver", options);
+    rclcpp::executors::MultiThreadedExecutor exec;
     auto ip = std::make_shared<ImageProjection>(options);
     exec.add_node(ip);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "\033[1;32m----> Image Projection Started.\033[0m");

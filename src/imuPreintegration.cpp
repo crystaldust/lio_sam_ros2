@@ -456,7 +456,7 @@ int main(int argc, char** argv)
     rclcpp::init(argc, argv);
     rclcpp::NodeOptions options;
     options.use_intra_process_comms(true);
-    rclcpp::executors::MultiThreadedExecutor exec; 
+    rclcpp::executors::SingleThreadedExecutor exec; 
     auto imu_pre = std::make_shared<IMUPreintegration>(options);
     exec.add_node(imu_pre);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "\033[1;32m----> IMU Preintegration Started.\033[0m");

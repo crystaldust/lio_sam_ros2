@@ -52,16 +52,16 @@ rosidl_target_interfaces(${PROJECT_NAME}_imageProjection ${PROJECT_NAME} "rosidl
 
 add_executable(${PROJECT_NAME}_imuPreintegration src/imuPreintegration.cpp)
 ament_target_dependencies(${PROJECT_NAME}_imuPreintegration rclcpp rclpy std_msgs sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros tf2_eigen tf2_sensor_msgs tf2_geometry_msgs OpenCV PCL GTSAM Eigen)
-target_link_libraries(${PROJECT_NAME}_imuPreintegration gtsam ${GTSAM_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_imuPreintegration gtsam)
 rosidl_target_interfaces(${PROJECT_NAME}_imuPreintegration ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 add_executable(${PROJECT_NAME}_mapOptimization src/mapOptimization.cpp)
 ament_target_dependencies(${PROJECT_NAME}_mapOptimization rclcpp rclpy std_msgs sensor_msgs geometry_msgs nav_msgs visualization_msgs tf2 tf2_ros tf2_eigen tf2_sensor_msgs tf2_geometry_msgs OpenCV PCL GTSAM)
-target_link_libraries(${PROJECT_NAME}_mapOptimization gtsam ${GTSAM_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_mapOptimization gtsam)
 rosidl_target_interfaces(${PROJECT_NAME}_mapOptimization ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 install(
-  DIRECTORY launch config
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
 
