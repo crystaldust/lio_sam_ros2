@@ -41,7 +41,9 @@ $ source install/setup.bash # Don't forget to source the environment!
 
 ```bash
 # Make sure you are now at the root of the lio-sam-ros2 project
-$ colcon build
+# The CPLUS_INCLUDE_PATH should be specified explicitly, or colcon won't find the perception related headers
+# This is strange, should take a look and figure out why.
+$ CPLUS_INCLUDE_PATH=~lio-sam-ros2-deps/install/include/ colcon build
 $ souce install/setup.bash
 ```
 
