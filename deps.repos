@@ -1,0 +1,13 @@
+repositories:
+  vision_opencv:
+    type: git
+    url: https://github.com/ros-perception/vision_opencv
+    version: ros2
+  pcl_msgs:
+    type: git
+    url: https://github.com/ros-perception/pcl_msgs
+    version: ros2
+  perception_pcl:
+    type: git
+    url: https://github.com/ros-perception/perception_pcl
+    version: foxy-devel
